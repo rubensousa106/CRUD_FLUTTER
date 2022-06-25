@@ -4,7 +4,6 @@ import 'package:projecto_final/screens/details/details_screen.dart';
 import 'package:projecto_final/size_config.dart';
 
 import '../../../components/default_button.dart';
-
 // This is the best practice
 import '../components/splash_content.dart';
 
