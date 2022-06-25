@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../size_config.dart';
-import '../../../home/components/home_header.dart';
+import '../../home/components/home_header.dart';
 import 'categories.dart';
 import 'home_header.dart';
 
