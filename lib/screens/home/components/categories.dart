@@ -1,69 +1,173 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../size_config.dart';
+class Categories extends StatefulWidget {
+  const Categories({Key? key}) : super(key: key);
 
-class Categories extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    List<Map<String, dynamic>> categories = [
-      {"icon": "assets/icons/Flash Icon.svg", "text": "Flash Deal"},
-      {"icon": "assets/icons/Bill Icon.svg", "text": "Bill"},
-      {"icon": "assets/icons/Game Icon.svg", "text": "Game"},
-      {"icon": "assets/icons/Gift Icon.svg", "text": "Daily Gift"},
-      {"icon": "assets/icons/Discover.svg", "text": "More"},
-    ];
-    return Padding(
-      padding: EdgeInsets.all(getProportionateScreenWidth(20)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: List.generate(
-          categories.length,
-          (index) => CategoryCard(
-            icon: categories[index]["icon"],
-            text: categories[index]["text"],
-            press: () {},
-          ),
-        ),
-      ),
-    );
-  }
+  State<Categories> createState() => _CategoriesState();
 }
 
-class CategoryCard extends StatelessWidget {
-  const CategoryCard({
-    Key? key,
-    required this.icon,
-    required this.text,
-    required this.press,
-  }) : super(key: key);
+class _CategoriesState extends State<Categories> {
+  // text fields' controllers
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _categoriaController = TextEditingController();
 
-  final String? icon, text;
-  final GestureTapCallback press;
+  final CollectionReference _productss =
+      FirebaseFirestore.instance.collection('products');
+
+  // This function is triggered when the floatting button or one of the edit buttons is pressed
+  // Adding a product if no documentSnapshot is passed
+  // If documentSnapshot != null then update an existing product
+  Future<void> _createOrUpdate([DocumentSnapshot? documentSnapshot]) async {
+    String action = 'create';
+    if (documentSnapshot != null) {
+      action = 'update';
+      _nameController.text = documentSnapshot['nome'];
+      _priceController.text = documentSnapshot['preco'].toString();
+      _categoriaController.text = documentSnapshot['categoria'];
+    }
+
+    await showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (BuildContext ctx) {
+          return Padding(
+            padding: EdgeInsets.only(
+                top: 20,
+                left: 20,
+                right: 20,
+                // prevent the soft keyboard from covering text fields
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Nome'),
+                ),
+                TextField(
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  controller: _priceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Preco',
+                  ),
+                ),
+                TextField(
+                  controller: _categoriaController,
+                  decoration: const InputDecoration(labelText: 'Categoria'),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                ElevatedButton(
+                  child: Text(action == 'create' ? 'Create' : 'Update'),
+                  onPressed: () async {
+                    final String? nome = _nameController.text;
+                    final double? preco =
+                        double.tryParse(_priceController.text);
+                    final String? categoria = _categoriaController.text;
+                    if (nome != null && preco != null) {
+                      if (action == 'create') {
+                        // Persistencias dos campos na BD
+                        await _productss.add({
+                          "nome": nome,
+                          "preco": preco,
+                          "categoria": categoria
+                        });
+                      }
+
+                      if (action == 'update') {
+                        // Actualizacao dos campos
+                        await _productss.doc(documentSnapshot!.id).update({
+                          "nome": nome,
+                          "preco": preco,
+                          "categoria": categoria
+                        });
+                      }
+
+                      // Inicialiacao dos campos
+                      _nameController.text = '';
+                      _priceController.text = '';
+                      _categoriaController.text = "";
+
+                      // Hide the bottom sheet
+                      Navigator.of(context).pop();
+                    }
+                  },
+                )
+              ],
+            ),
+          );
+        });
+  }
+
+  // Deleteing a product by id
+  Future<void> _deleteProduct(String productId) async {
+    await _productss.doc(productId).delete();
+
+    // Show a snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Produto Eliminado com sucesso')));
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: press,
-      child: SizedBox(
-        width: getProportionateScreenWidth(55),
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(getProportionateScreenWidth(15)),
-              height: getProportionateScreenWidth(55),
-              width: getProportionateScreenWidth(55),
-              decoration: BoxDecoration(
-                color: Color(0xFFFFECDF),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: SvgPicture.asset(icon!),
-            ),
-            SizedBox(height: 5),
-            Text(text!, textAlign: TextAlign.center)
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Lista de Produtos'),
+      ),
+      // Using StreamBuilder to display all products from Firestore in real-time
+      body: StreamBuilder(
+        stream: _productss.snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+          if (streamSnapshot.hasData) {
+            return ListView.builder(
+              itemCount: streamSnapshot.data!.docs.length,
+              itemBuilder: (context, index) {
+                final DocumentSnapshot documentSnapshot =
+                    streamSnapshot.data!.docs[index];
+                return Card(
+                  margin: const EdgeInsets.all(10),
+                  child: ListTile(
+                    title: Text(documentSnapshot['nome']),
+                    subtitle: Text(documentSnapshot['preco'].toString()),
+                    trailing: SizedBox(
+                      width: 100,
+                      child: Row(
+                        children: [
+                          // Press this button to edit a single product
+
+                          IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () =>
+                                  _createOrUpdate(documentSnapshot)),
+                          // This icon button is used to delete a single product
+                          IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () =>
+                                  _deleteProduct(documentSnapshot.id)),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
+      // Add new product
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _createOrUpdate(),
+        child: const Icon(Icons.add),
       ),
     );
   }

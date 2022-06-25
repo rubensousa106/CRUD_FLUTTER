@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:projecto_final/screens/details/details_screen.dart';
 import 'package:projecto_final/screens/home/components/search_field.dart';
+import 'package:projecto_final/screens/home/home_screen.dart';
 
 import '../../../size_config.dart';
 import '../../home/components/search_field.dart';
@@ -23,7 +23,7 @@ class HomeHeader extends StatelessWidget {
           IconBtnWithCounter(
             svgSrc: "assets/icons/Cart Icon.svg",
             press: () => Navigator.pushNamed(
-                context, DetailsScreen.routeName), //Corrigir isto !
+                context, HomeScreen.routeName), //Corrigir isto !
           ),
           IconBtnWithCounter(
             svgSrc: "assets/icons/Bell.svg",

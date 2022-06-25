@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:projecto_final/constants.dart';
-import 'package:projecto_final/screens/details/details_screen.dart';
+import 'package:projecto_final/screens/home/home_screen.dart';
 import 'package:projecto_final/size_config.dart';
 
 import '../../../components/default_button.dart';
@@ -72,7 +72,8 @@ class _BodyState extends State<Body> {
                       text: "Continue",
                       press: () {
                         Navigator.pushNamed(context,
-                            DetailsScreen.routeName); // Corrigir isto !
+                            HomeScreen
+                                .routeName); // Corrigir isto ! Espera um widget
                       },
                     ),
                     Spacer(),
