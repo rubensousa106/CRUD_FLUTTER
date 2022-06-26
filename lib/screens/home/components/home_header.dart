@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:projecto_final/screens/home/components/search_field.dart';
-import 'package:projecto_final/screens/home/home_screen.dart';
 
 import '../../../size_config.dart';
 import '../../home/components/search_field.dart';
-import 'icon_btn_with_counter.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({
@@ -18,18 +16,8 @@ class HomeHeader extends StatelessWidget {
           EdgeInsets.symmetric(horizontal: getProportionateScreenWidth(20)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+        children: const [
           SearchField(),
-          IconBtnWithCounter(
-            svgSrc: "assets/icons/Cart Icon.svg",
-            press: () => Navigator.pushNamed(
-                context, HomeScreen.routeName), //Corrigir isto !
-          ),
-          IconBtnWithCounter(
-            svgSrc: "assets/icons/Bell.svg",
-            numOfitem: 3,
-            press: () {},
-          ),
         ],
       ),
     );

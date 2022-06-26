@@ -9,24 +9,27 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
-  // text fields' controllers
+  // textfields controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _categoriaController = TextEditingController();
 
   final CollectionReference _productss =
-      FirebaseFirestore.instance.collection('products');
+      FirebaseFirestore.instance.collection('Produtos');
 
-  // This function is triggered when the floatting button or one of the edit buttons is pressed
-  // Adding a product if no documentSnapshot is passed
-  // If documentSnapshot != null then update an existing product
+  // Esta função é acionada quando o botão flutuante ou um dos botões de edição é pressionado
+  // Adicionando um produto se nenhum documentSnapshot for passado
+  // Se documentSnapshot != null então atualize um produto existente
   Future<void> _createOrUpdate([DocumentSnapshot? documentSnapshot]) async {
     String action = 'create';
     if (documentSnapshot != null) {
       action = 'update';
-      _nameController.text = documentSnapshot['nome'];
-      _priceController.text = documentSnapshot['preco'].toString();
-      _categoriaController.text = documentSnapshot['categoria'];
+      _nameController.text = documentSnapshot[
+          'nome']; //documentSnapshot elemeneto de conexao com a BD
+      _priceController.text = documentSnapshot['preco']
+          .toString(); //documentSnapshot elemeneto de conexao com a BD
+      _categoriaController.text = documentSnapshot[
+          'categoria']; //documentSnapshot elemeneto de conexao com a BD
     }
 
     await showModalBottomSheet(
@@ -38,7 +41,7 @@ class _CategoriesState extends State<Categories> {
                 top: 20,
                 left: 20,
                 right: 20,
-                // prevent the soft keyboard from covering text fields
+                // impede que o teclado virtual cubra campos de texto
                 bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -94,7 +97,7 @@ class _CategoriesState extends State<Categories> {
                       _priceController.text = '';
                       _categoriaController.text = "";
 
-                      // Hide the bottom sheet
+                      //Ocultar a folha inferior
                       Navigator.of(context).pop();
                     }
                   },
@@ -113,14 +116,13 @@ class _CategoriesState extends State<Categories> {
     ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produto Eliminado com sucesso')));
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Lista de Produtos'),
       ),
-      // Using StreamBuilder to display all products from Firestore in real-time
+      // Usando o StreamBuilder para exibir todos os produtos do Firestore em tempo real
       body: StreamBuilder(
         stream: _productss.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -139,13 +141,12 @@ class _CategoriesState extends State<Categories> {
                       width: 100,
                       child: Row(
                         children: [
-                          // Press this button to edit a single product
-
+                          // Pressione este botão para editar um único produto
                           IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () =>
                                   _createOrUpdate(documentSnapshot)),
-                          // This icon button is used to delete a single product
+                          // Este botão ícone é usado para excluir um único produto
                           IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () =>
