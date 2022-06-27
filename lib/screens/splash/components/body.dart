@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:projecto_final/constants.dart';
-import 'package:projecto_final/screens/home/home_screen.dart';
+import 'package:projecto_final/screens/ecra/ecra_screen.dart';
 import 'package:projecto_final/size_config.dart';
 
 import '../../../components/default_button.dart';
@@ -59,7 +59,7 @@ class _BodyState extends State<Body> {
                     DefaultButton(
                       text: "Continue",
                       press: () {
-                        Navigator.pushNamed(context, HomeScreen.routeName);
+                        Navigator.pushNamed(context, EcraScreen.routeName);
                       },
                     ),
                     Spacer(),
